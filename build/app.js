@@ -1679,7 +1679,11 @@ class GameCoordinator {
         this.lives = 2;
         // CUSTOM CODE
         this.bombsUsed = 0;
-
+        if (this.bombs){
+            for (let i = 0; i < this.bombs.length; i++){
+                this.bombs[i].reset();
+            }
+        }
         this.extraLifeGiven = false;
         this.remainingDots = 0;
         this.allowKeyPresses = true;
@@ -2347,7 +2351,11 @@ class GameCoordinator {
             const entityRef = entity;
             entityRef.moving = false;
         });
-
+        this.bombsUsed = 0;
+        this.updateBombDisplay();
+        for(let i = 0; i < this.bombs.length; i++){
+            this.bombs[i].reset();
+        }
         this.removeTimer({detail: {timer: this.fruitTimer}});
         this.removeTimer({detail: {timer: this.ghostCycleTimer}});
         this.removeTimer({detail: {timer: this.endIdleTimer}});
@@ -3051,6 +3059,7 @@ class Pickup {
     }
 }
 
+// CUSTOM CODE
 class Bomb {
     constructor(scaledTileSize, column, row, pacman, mazeDiv) {
         this.pacman = pacman;
@@ -3058,7 +3067,7 @@ class Bomb {
         this.nearPacman = false;    
         this.id = 'bomb' + Math.random().toString(36).substr(2, 9);
         this.setStyleMeasurements(scaledTileSize, column, row);
-        this.visible = false;
+        this.visible = false; // another word for !exploded or not used
     }
     
     explode() {
@@ -3078,7 +3087,8 @@ class Bomb {
      */
     reset() {
         // HIDE THE BOMB BY DEFAULT
-        this.animationTarget.style.visibility = 'hidden';
+        this.hideBomb();
+        // this.animationTarget.style.visibility = 'hidden';
     }
 
     determineImage() {
