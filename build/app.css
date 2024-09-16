@@ -101,6 +101,10 @@
     .game-ui .bottom .fruit-display {
       display: flex;
       flex-direction: row-reverse; }
+    
+    .game-ui .bottom .bomb-display {
+      display: flex;
+      flex-direction: row-reverse; }
 
 @media (orientation: landscape) {
   .game-ui {

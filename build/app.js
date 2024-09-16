@@ -180,6 +180,7 @@ class Ghost {
         this.scaredSpeed = pacmanSpeed * 0.5;
         this.transitionSpeed = pacmanSpeed * 0.4;
         this.eyeSpeed = pacmanSpeed * 2;
+        this.bombedSpeed = pacmanSpeed * 0.5;
 
         this.velocityPerMs = this.defaultSpeed;
         this.moving = false;
@@ -694,6 +695,7 @@ class Ghost {
                     gridPositionCopy, this.direction, this.scaledTileSize,
                     );
             this.mode = this.defaultMode;
+            this.cmode = null;
             window.dispatchEvent(new Event('restoreGhost'));
         }
 
@@ -747,8 +749,9 @@ class Ghost {
         const pacmanGridPosition = this.characterUtil.determineGridPosition(
                 this.pacman.position, this.scaledTileSize,
                 );
+        
         const velocity = this.determineVelocity(
-                gridPosition, this.mode,
+                gridPosition, this.mode, this.cmode
                 );
 
         if (this.idleMode) {
@@ -773,7 +776,10 @@ class Ghost {
                 newPosition, this.scaledTileSize, this.mazeArray,
                 );
 
-        this.checkCollision(gridPosition, pacmanGridPosition);
+        // this.checkCollision(gridPosition, pacmanGridPosition);
+
+        // CUSTOM CODE
+        this.checkCollision(gridPosition, pacmanGridPosition, window.bombs);
 
         return newPosition;
     }
@@ -875,7 +881,7 @@ class Ghost {
      * @param {({x: number, y: number})} position - An x-y position on the 2D Maze Array
      * @param {({x: number, y: number})} pacman - Pacman's current x-y position on the 2D Maze Array
      */
-    checkCollision(position, pacman) {
+    checkCollision(position, pacman, bombs) {
         if (this.calculateDistance(position, pacman) < 1
                 && this.mode !== 'eyes'
                 && this.allowCollision) {
@@ -890,6 +896,32 @@ class Ghost {
                 window.dispatchEvent(new Event('deathSequence'));
             }
         }
+
+        // CUSTOM CODE
+        for(let i = 0; i < bombs.length; i++){
+            // console.log(bombs[i].visible);
+            if (bombs[i].visible == false) {
+                continue;
+            }
+            // console.log(position, bombs[i].determineGridPosition(this.scaledTileSize));
+            // console.log(this.calculateDistance(position, bombs[i].determineGridPosition(this.scaledTileSize)));
+            if (this.calculateDistance(position, bombs[i].determineGridPosition(this.scaledTileSize)) < 1.2
+                && this.allowCollision) {
+                    bombs[i].explode();
+                    console.log("Collision with bomb");
+                // if (this.mode === 'scared') {
+                    window.dispatchEvent(new CustomEvent('bombGhost', {
+                        detail: {
+                            ghost: this,
+                        },
+                    }));
+                    this.mode = 'eyes';
+                    this.cmode="bombed"
+                // } else {
+                    // window.dispatchEvent(new Event('deathSequence'));
+                // }
+            }
+        }
     }
 
     /**
@@ -898,7 +930,10 @@ class Ghost {
      * @param {('chase'|'scatter'|'scared'|'eyes')} mode - The character's behavior mode
      * @returns {number}
      */
-    determineVelocity(position, mode) {
+    determineVelocity(position, mode, cmode) {
+        if(this.cmode=="bombed"){
+            return this.bombedSpeed
+        }
         if (mode === 'eyes') {
             return this.eyeSpeed;
         }
@@ -1081,6 +1116,7 @@ class Pacman {
      * @param {Boolean} startMoving - If true, Pacman will move upon key press
      */
     changeDirection(newDirection, startMoving) {
+        console.log(newDirection)
         this.desiredDirection = newDirection;
         this.pacmanArrow.style.backgroundImage = 'url(app/style/graphics/'
                 + `spriteSheets/characters/pacman/arrow_${this.desiredDirection}.svg)`;
@@ -1236,6 +1272,9 @@ class GameCoordinator {
         this.highScoreDisplay = document.getElementById('high-score-display');
         this.extraLivesDisplay = document.getElementById('extra-lives');
         this.fruitDisplay = document.getElementById('fruit-display');
+        //  CUSTOM CODE
+        this.bombDisplay = document.getElementById('bomb-display');
+
         this.mainMenu = document.getElementById('main-menu-container');
         this.gameStartButton = document.getElementById('game-start');
         this.pauseButton = document.getElementById('pause-button');
@@ -1326,6 +1365,8 @@ class GameCoordinator {
                 'click', this.soundButtonClick.bind(this),
                 );
 
+        // CUSTOM CODE
+        this.nbombs = 5;
    
 
          const head = document.getElementsByTagName('head')[0];
@@ -1636,6 +1677,9 @@ class GameCoordinator {
         this.points = 0;
         this.level = 1;
         this.lives = 2;
+        // CUSTOM CODE
+        this.bombsUsed = 0;
+
         this.extraLifeGiven = false;
         this.remainingDots = 0;
         this.allowKeyPresses = true;
@@ -1672,11 +1716,29 @@ class GameCoordinator {
                     'fruit', this.scaledTileSize, 13.5, 17, this.pacman,
                     this.mazeDiv, 100,
                     );
+
+            // CUSTOM CODE
+            this.bombs = [] // duplicates of the bomb
+            for (let i = 0; i < this.nbombs; i++) {
+                this.bombs.push(
+                    new Bomb(
+                            this.scaledTileSize,
+                            13.5, 17,
+                            this.pacman,
+                            this.mazeDiv
+                        )
+                )
+            }
+            // HACK to make the bombs accessible for ghost collision detection
+            window.bombs = this.bombs;
         }
 
         this.entityList = [
-            this.pacman, this.blinky, this.pinky, this.inky, this.clyde, this.fruit,
+            this.pacman, this.blinky, this.pinky, this.inky, this.clyde, this.fruit, 
+            
         ];
+
+        this.entityList.push(...this.bombs)
 
         this.ghosts = [
             this.blinky,
@@ -1709,6 +1771,9 @@ class GameCoordinator {
         this.pointsDisplay.innerHTML = '00';
         this.highScoreDisplay.innerHTML = this.highScore || '00';
         this.clearDisplay(this.fruitDisplay);
+        
+        // CUSTOM CODE
+        this.clearDisplay(this.bombDisplay)
 
         const volumePreference = parseInt(
                 localStorage.getItem('volumePreference') || 1, 10,
@@ -1784,6 +1849,11 @@ class GameCoordinator {
             this.pickups.forEach((pickup) => {
                 pickup.checkPacmanProximity(maxDistance, pacmanCenter, debugging);
             });
+
+            this.bombs.forEach((bomb) => {
+                bomb.checkPacmanProximity(maxDistance, pacmanCenter, debugging);
+            }
+            );
         }
     }
 
@@ -1812,6 +1882,8 @@ class GameCoordinator {
 
         this.displayText({left, top}, 'ready', duration, width, height);
         this.updateExtraLivesDisplay();
+        // CUSTOM CODE
+        this.updateBombDisplay();
 
         new Timer(() => {
             this.allowPause = true;
@@ -1881,6 +1953,22 @@ class GameCoordinator {
         this.fruitDisplay.appendChild(fruitPic);
     }
 
+    // CUSTOM CODE
+    removeBombFromDisplay() {
+        this.bombDisplay.removeChild(this.bombDisplay.firstChild);
+    }
+
+    updateBombDisplay() {
+        this.clearDisplay(this.bombDisplay);
+
+        for (let i = 0; i < (this.nbombs - this.bombsUsed); i += 1) {
+            const bombPic = document.createElement('img');
+            bombPic.setAttribute('src', 'app/style/graphics/spriteSheets/pickups/bomb.png');
+            bombPic.style.height = `${this.scaledTileSize * 2}px`;
+            this.bombDisplay.appendChild(bombPic);
+        }
+    }
+
     /**
      * Cycles the ghosts between 'chase' and 'scatter' mode
      * @param {('chase'|'scatter')} mode
@@ -1916,12 +2004,15 @@ class GameCoordinator {
      * Register listeners for various game sequences
      */
     registerEventListeners() {
+        // TODO: add buttons for shooting ghosts
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('awardPoints', this.awardPoints.bind(this));
         window.addEventListener('deathSequence', this.deathSequence.bind(this));
         window.addEventListener('dotEaten', this.dotEaten.bind(this));
         window.addEventListener('powerUp', this.powerUp.bind(this));
         window.addEventListener('eatGhost', this.eatGhost.bind(this));
+        // CUSTOM CODE
+        window.addEventListener('bombGhost', this.bombGhost.bind(this))
         window.addEventListener('restoreGhost', this.restoreGhost.bind(this));
         window.addEventListener('addTimer', this.addTimer.bind(this));
         window.addEventListener('removeTimer', this.removeTimer.bind(this));
@@ -1967,6 +2058,40 @@ class GameCoordinator {
             this.soundButtonClick();
         } else if (this.movementKeys[e.keyCode]) {
             this.changeDirection(this.movementKeys[e.keyCode]);
+        }
+        // custom code
+        // check if space is pressed
+        else if (e.keyCode === 32) {
+            console.log("Space pressed")
+            // this.handlePauseKey();
+            this.spawnBomb();
+        }
+    }
+    
+    // CUSTOM CODE
+    spawnBomb() {
+        if (this.bombsUsed < this.nbombs) {
+            // set the bombs position to pacman's position
+            // this.bombs[this.bombsUsed].setStyleMeasurements(
+            //     this.scaledTileSize,
+            //     this.pacman.position.left,
+            //     this.pacman.position.top
+            // )
+            // copy this.pacman
+            const pacman = Object.assign({}, this.pacman)
+            console.log(this.pacman.position.left, pacman.position.top)
+            const newCenter = {
+                x: this.pacman.position.left + this.scaledTileSize,
+                y: this.pacman.position.top + this.scaledTileSize,
+            };
+            this.bombs[this.bombsUsed].animationTarget.style.top = `${pacman.position.top}px`;
+            this.bombs[this.bombsUsed].animationTarget.style.left = `${pacman.position.left}px`;
+            this.bombs[this.bombsUsed].x = newCenter.x;
+            this.bombs[this.bombsUsed].y = newCenter.y;
+            this.bombs[this.bombsUsed].center = newCenter;
+            this.bombs[this.bombsUsed].showBomb();
+            this.bombsUsed += 1;
+            this.updateBombDisplay();
         }
     }
 
@@ -2395,6 +2520,72 @@ class GameCoordinator {
             this.resumeTimer({detail: {timer: this.ghostFlashTimer}});
             this.resumeTimer({detail: {timer: this.ghostCycleTimer}});
             this.resumeTimer({detail: {timer: this.fruitTimer}});
+            this.allowPacmanMovement = true;
+            this.pacman.display = true;
+            this.pacman.moving = true;
+            e.detail.ghost.display = true;
+            e.detail.ghost.moving = true;
+            this.ghosts.forEach((ghost) => {
+                const ghostRef = ghost;
+                ghostRef.animate = true;
+                ghostRef.pause(false);
+                ghostRef.allowCollision = true;
+            });
+        }, pauseDuration);
+    }
+
+    bombGhost(e) {
+        const pauseDuration = 1000;
+        const {position, measurement} = e.detail.ghost;
+
+        this.pauseTimer({detail: {timer: this.ghostFlashTimer}});
+        this.pauseTimer({detail: {timer: this.ghostCycleTimer}});
+        // this.pauseTimer({detail: {timer: this.fruitTimer}});
+        if (isSafari()) {
+            playSound('eat_ghost');
+        } else {
+            this.soundManager.play('eat_ghost');
+        }
+
+        this.scaredGhosts = this.scaredGhosts.filter(
+                ghost => ghost.name !== e.detail.ghost.name,
+                );
+        // this.eyeGhosts += 1;
+
+        // this.ghostCombo += 1;
+        const comboPoints = 100;
+        window.dispatchEvent(new CustomEvent('awardPoints', {
+            detail: {
+                points: comboPoints,
+            },
+        }));
+        this.displayText(
+                position, "XXX", pauseDuration, measurement,
+                );
+
+        // this.allowPacmanMovement = false;
+        // this.pacman.display = false;
+        // this.pacman.moving = false;
+        e.detail.ghost.display = false;
+        e.detail.ghost.moving = false;
+        e.detail.ghost.allowCollision = false;
+        this.ghosts.forEach((ghost) => {
+            const ghostRef = ghost;
+            ghostRef.animate = false;
+            ghostRef.pause(true);
+            ghostRef.allowCollision = false;
+        });
+
+        new Timer(() => {
+            if (isSafari()) {
+                playSound('eyes');
+            } else {
+                this.soundManager.setAmbience('eyes');
+            }
+
+            this.resumeTimer({detail: {timer: this.ghostFlashTimer}});
+            this.resumeTimer({detail: {timer: this.ghostCycleTimer}});
+            // this.resumeTimer({detail: {timer: this.fruitTimer}});
             this.allowPacmanMovement = true;
             this.pacman.display = true;
             this.pacman.moving = true;
@@ -2860,7 +3051,137 @@ class Pickup {
     }
 }
 
+class Bomb {
+    constructor(scaledTileSize, column, row, pacman, mazeDiv) {
+        this.pacman = pacman;
+        this.mazeDiv = mazeDiv;
+        this.nearPacman = false;    
+        this.id = 'bomb' + Math.random().toString(36).substr(2, 9);
+        this.setStyleMeasurements(scaledTileSize, column, row);
+        this.visible = false;
+    }
+    
+    explode() {
+        // TODO: animation
+        // change the image to defused for a second
+        this.animationTarget.style.backgroundImage = `url(app/style/graphics/spriteSheets/pickups/exploded.png)`;
+        const timer = setTimeout(() => {
+            //  this.determineImage();
+            // hide the bomb
+            this.hideBomb();
+        }
+        , 1000);
 
+    }
+    /**
+     * Resets the bomb's visibility
+     */
+    reset() {
+        // HIDE THE BOMB BY DEFAULT
+        this.animationTarget.style.visibility = 'hidden';
+    }
+
+    determineImage() {
+        // if(this.visible){
+            return `url(app/style/graphics/spriteSheets/pickups/bomb.png)`;
+        // }
+        // return `url(app/style/graphics/spriteSheets/pickups/defused.png)`;
+    }
+
+    setStyleMeasurements(scaledTileSize, column, row){
+        this.size = scaledTileSize;;
+        this.x = (column * scaledTileSize);
+        this.y = (row * scaledTileSize);
+        this.center = {
+            x: column * scaledTileSize,
+            y: row * scaledTileSize,
+        };
+
+        this.animationTarget = document.createElement('div');
+        this.animationTarget.style.position = 'absolute';
+        this.animationTarget.style.backgroundSize = `${this.size*2}px`;
+        this.animationTarget.style.backgroundImage = this.determineImage();
+        this.animationTarget.style.height = `${this.size*2}px`;
+        this.animationTarget.style.width = `${this.size*2}px`;
+        this.animationTarget.style.top = `${this.y}px`;
+        this.animationTarget.style.left = `${this.x}px`;
+        this.mazeDiv.appendChild(this.animationTarget);
+
+        this.reset();
+    }
+
+    showBomb() {
+        this.animationTarget.style.visibility = 'visible';
+        this.visible = true;
+    }
+
+    hideBomb() {
+        this.animationTarget.style.visibility = 'hidden';
+        this.visible = false;
+    }
+
+    checkForCollision(pickup, originalPacman) {
+        const pacman = Object.assign({}, originalPacman);
+        pacman.x += (pacman.size * 0.25);
+        pacman.y += (pacman.size * 0.25);
+        pacman.size /= 2;
+
+        // print checking range between 
+        // console.log("Checking ",this.id, pickup.x, pickup.y, pickup.size, pacman.x, pacman.y, pacman.size);
+        return (pickup.x < pacman.x + pacman.size
+                && pickup.x + pickup.size > pacman.x
+                && pickup.y < pacman.y + pacman.size
+                && pickup.y + pickup.size > pacman.y);
+        
+    }
+
+    checkPacmanProximity(maxDistance, pacmanCenter, debugging) {
+        if (this.animationTarget.style.visibility !== 'hidden') {
+            const distance = Math.sqrt(
+                    ((this.center.x - pacmanCenter.x) ** 2)
+                    + ((this.center.y - pacmanCenter.y) ** 2),
+                    );
+            
+            this.nearPacman = (distance <= maxDistance);
+            
+            // this.animationTarget.style.background = this.nearPacman ? 'lime' : 'red';
+            
+        }
+    }
+    determineGridPosition(scaledTileSize) {
+        return {
+            x: (this.x / scaledTileSize) + 0.5,
+            y: (this.y / scaledTileSize) + 0.5,
+        };
+    }
+    // shouldCheckForCollision() {
+    //     return this.animationTarget.style.visibility !== 'hidden'
+    //             && this.nearPacman;
+    // }
+
+    update() {
+        // if (this.shouldCheckForCollision()) {
+            if (this.checkForCollision(
+                    {
+                        x: this.x,
+                        y: this.y,
+                        size: this.size,
+                    }, {
+                x: this.pacman.position.left,
+                y: this.pacman.position.top,
+                size: this.pacman.measurement,
+            },
+                    )) {
+                        // console.log('BOMB HIT');
+                // this.animationTarget.style.visibility = 'hidden';
+                // window.dispatchEvent(new Event('death'));
+            }
+        // }
+
+    }
+            
+    
+}
 class CharacterUtil {
     constructor() {
         this.directions = {
