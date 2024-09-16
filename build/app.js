@@ -2114,6 +2114,14 @@ class GameCoordinator {
             this.bombs[this.bombsUsed].showBomb();
             this.bombsUsed += 1;
             this.updateBombDisplay();
+
+            // play sound
+            if (isSafari()) {
+                playSound('fruit');
+            }
+            else {
+                this.soundManager.play('fruit');
+            }
         }
     }
 
