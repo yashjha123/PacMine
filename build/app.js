@@ -32,6 +32,24 @@
 
 var ambS;
 function playSound(sound) {
+    if(sound=="bomb"){
+        var path = 'app/style/audio/fuse.ogg';
+        var context = window.audioContext;
+        var request = new XMLHttpRequest();
+        console.log('Playing ' + path);
+        request.open('GET', path, true);
+        request.responseType = 'arraybuffer';
+        request.addEventListener('load', function (e) {
+            context.decodeAudioData(this.response, function (buffer) {
+                var source = context.createBufferSource();
+                source.buffer = buffer;
+                source.connect(context.destination);
+                source.start(0);
+            });
+        }, false);
+        request.send();
+        return;
+    }
     var path = 'app/style/audio/' + sound + '.mp3';
     var context = window.audioContext;
     var request = new XMLHttpRequest();
@@ -1403,7 +1421,7 @@ class GameCoordinator {
             return this.determineScale(scale + 0.5);
         }
 
-        return scale - 1;
+        return scale - 1.5;
     }
 
     /**
@@ -2550,15 +2568,15 @@ class GameCoordinator {
         this.pauseTimer({detail: {timer: this.ghostCycleTimer}});
         // this.pauseTimer({detail: {timer: this.fruitTimer}});
         if (isSafari()) {
-            playSound('eat_ghost');
+            playSound('bomb');
         } else {
-            this.soundManager.play('eat_ghost');
+            this.soundManager.play('bomb');
         }
 
         this.scaredGhosts = this.scaredGhosts.filter(
                 ghost => ghost.name !== e.detail.ghost.name,
                 );
-        // this.eyeGhosts += 1;
+        this.eyeGhosts += 1;
 
         // this.ghostCombo += 1;
         const comboPoints = 100;
@@ -2585,11 +2603,11 @@ class GameCoordinator {
         });
 
         new Timer(() => {
-            if (isSafari()) {
-                playSound('eyes');
-            } else {
-                this.soundManager.setAmbience('eyes');
-            }
+            // if (isSafari()) {
+            //     playSound('eyes');
+            // } else {
+            //     this.soundManager.setAmbience('eyes');
+            // }
 
             this.resumeTimer({detail: {timer: this.ghostFlashTimer}});
             this.resumeTimer({detail: {timer: this.ghostCycleTimer}});
@@ -3621,6 +3639,12 @@ class SoundManager {
         if (isSafari()) {
             playSound(sound);
         } else {
+            if(sound=="bomb"){
+                this.soundEffect = new Audio(`${this.baseUrl}fuse.ogg`);
+                this.soundEffect.volume = this.masterVolume;
+                this.soundEffect.play();
+                return;
+            }
             this.soundEffect = new Audio(`${this.baseUrl}${sound}.${this.fileFormat}`);
             this.soundEffect.volume = this.masterVolume;
             this.soundEffect.play();
