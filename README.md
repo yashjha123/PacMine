@@ -18,7 +18,7 @@
 # //////////////////////////////////////////////////////////////////////////////////////////
 
 ```
-[▶️ Play Game Online!](https://yashjha123.github.io/PacMine/) $~~$ [🔗 Link to Source Code](https://github.com/yashjha123/PacMine) $~~$ [👨‍💻 GitHub @yashjha123](https://github.com/yashjha123/PacMine) 
+[▶️ Play Game Online!](https://yashjha123.github.io/PacMine/) [🔗 Link to Source Code](https://github.com/yashjha123/PacMine) [👨‍💻 GitHub @yashjha123](https://github.com/yashjha123/PacMine) 
 ---
 ```
 ----------------------------------------------------------------------------------->
@@ -49,7 +49,7 @@ Bomb Rule:
 3. It's your goal to determine the ghosts' move so they get caught as many times.
 4. You get 5 mines in the beginning. They fill up again every level.
 
-## Most Important Rule of All: DON'T DIE
+### Most Important Rule of All: DON'T DIE
 
 ---
 
@@ -63,7 +63,7 @@ Bomb Rule:
 
 In PacMine, understanding the behavior of ghosts is key to your strategy. The ghosts move in predictable patterns, which is your biggest advantage. Here's a breakdown of how the game works:
 
-### Ghost Movement Patterns:
+#### Ghost Movement Patterns:
 **Blinky**, **Pinky**, **Inky** and **Clyde**, collectively known as the Ghost Gang. They move in their own unique ways. These patterns can be figured out and used to your advantage. This comes with practice. Here are some hints
 1. **Red Ghosts**: Will follow you and move towards your position directly, so lead it into a trap with a well-placed mine.
 2. **Pink Ghost**: Predicts your next move and cuts you off at the worst moment. Avoid being too predictable.
@@ -71,13 +71,13 @@ In PacMine, understanding the behavior of ghosts is key to your strategy. The gh
 4. **Orange Ghost**: Hardest one to guess. It moves in unpredictable patterns. Stay aware of its moves and place mines where it frequently moves.
 
 
-### Mines and Traps
+#### Mines and Traps
 1. Plant your mines in tight spots like hallways or corners. Ghosts like to hang out there, so you'll catch 'em easy! 
 2. You can even trick them by moving in patterns they follow, then slipping away through tunnels or corners. 
 3. Just remember, mines are powerful but not endless, so use them wisely to catch as many ghosts as you can!
 
 
-### Power-ups and Scoring
+#### Power-ups and Scoring
 1. **Fruits**: Collect as many fruits as you can. They give you extra points.
 2. **Coints**: Your main objective should be to collect all coins. After you're done collecting points, you level up.
 3. **Bombs**: Bombs not only slow down the Ghosts, you score points.
