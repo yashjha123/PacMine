@@ -18,7 +18,7 @@
 # //////////////////////////////////////////////////////////////////////////////////////////
 
 ```
-[▶️ Play Game Online!](https://yashjha123.github.io/PacMine/) [🔗 Link to Source Code](https://github.com/yashjha123/PacMine) [👨‍💻 GitHub @yashjha123](https://github.com/yashjha123/PacMine) 
+[▶️ Play Game Online!](https://yashjha123.github.io/PacMine/) [🔗 Link to Source Code](https://github.com/yashjha123/PacMine) [👨‍💻 GitHub @yashjha123](https://github.com/yashjha123/) 
 ---
 ```
 ----------------------------------------------------------------------------------->
