@@ -82,6 +82,8 @@ In PacMine, understanding the behavior of ghosts is key to your strategy. The gh
 2. **Coints**: Your main objective should be to collect all coins. After you're done collecting points, you level up.
 3. **Bombs**: Bombs not only slow down the Ghosts, you score points.
 
+----
+
 ```
 ----------------------------------------------------------------------------------->
 ╔═╗╔═╗╔╦╗╦ ╦╔═╗
@@ -92,6 +94,7 @@ In PacMine, understanding the behavior of ghosts is key to your strategy. The gh
 
 No SETUP required; You can play the game right in your browser: [Open this URL](https://yashjha123.github.io/PacMine/)
 
+----
 
 ```
 ----------------------------------------------------------------------------------->
