@@ -28,6 +28,8 @@
     document.addEventListener('touchstart', fixAudioContext);
     // iOS 9
     document.addEventListener('touchend', fixAudioContext);
+
+    
 })();
 
 var ambS;
@@ -391,7 +393,7 @@ class Ghost {
                 delete possibleMoves[tile];
             }
         });
-
+        console.log(this.name,possibleMoves)
         return possibleMoves;
     }
 
@@ -1335,15 +1337,21 @@ class GameCoordinator {
             8: 5000,
         };
 
+
+        // this.mazeArray = [
+        //     ["XXX"],
+        //     ["X X"],
+        //     ["X X"],
+        // ]
         this.mazeArray = [
             ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
-            ['XooooooooooooXXooooooooooooX'],
-            ['XoXXXXoXXXXXoXXoXXXXXoXXXXoX'],
-            ['XOXXXXoXXXXXoXXoXXXXXoXXXXOX'],
-            ['XoXXXXoXXXXXoXXoXXXXXoXXXXoX'],
-            ['XooooooooooooooooooooooooooX'],
-            ['XoXXXXoXXoXXXXXXXXoXXoXXXXoX'],
-            ['XoXXXXoXXoXXXXXXXXoXXoXXXXoX'],
+            ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
+            ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
+            ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
+            ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
+            ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
+            ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
+            ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
             ['XooooooXXooooXXooooXXooooooX'],
             ['XXXXXXoXXXXX XX XXXXXoXXXXXX'],
             ['XXXXXXoXXXXX XX XXXXXoXXXXXX'],
@@ -1369,6 +1377,7 @@ class GameCoordinator {
             ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
         ];
 
+        visualizeMaze(this.mazeArray);
         this.mazeArray.forEach((row, rowIndex) => {
             this.mazeArray[rowIndex] = row[0].split('');
         });
