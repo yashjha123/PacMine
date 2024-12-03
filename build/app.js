@@ -1338,11 +1338,11 @@ class GameCoordinator {
         };
 
 
-        // this.mazeArray = [
-        //     ["XXX"],
-        //     ["X X"],
-        //     ["X X"],
-        // ]
+        this.mazeArray = [
+            ["XXX"],
+            ["X X"],
+            ["X X"],
+        ]
         // this.mazeArray = [
         //     ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
         //     ['XXXXXXXXXXXXXXXXXXXXXXXXXXXX'],
@@ -1909,7 +1909,7 @@ class GameCoordinator {
 
         const left = this.scaledTileSize * 11;
         const top = this.scaledTileSize * 16.5;
-        const duration = initialStart ? 4500 : 2000;
+        const duration = initialStart ? 4500: 2000;
         const width = this.scaledTileSize * 6;
         const height = this.scaledTileSize * 2;
 

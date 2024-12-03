@@ -23,7 +23,7 @@ function visualizeMaze(mazeArray) {
         let rowDiv = document.createElement("div");
         rowDiv.classList.add("maze-row-line");
         for (let col = 0 ; col < mazeArray[row][0].length; col++) {
-            console.log(row, col);
+            // console.log(row, col);
             let tileDiv = document.createElement("div");
             tileDiv.classList.add("maze-tile");
             let top_border = row == 0 ? false : mazeArray[row-1][0][col] == "X";
