@@ -12,15 +12,16 @@
 
 // FOR THE BLOCKS I CAN ALLOW THEM TO DELETE SOME OF THE SPACES, for example Block A can be ---- or X---
 const grammar_config = {
-  block: ["#A##B#::#C#", "#D#::#D#", "#E#"],
-  A: ["A"],
+  block: ["#A#", "#BC#","#D#"],
+  BC: ["B.0.0,C.3.3"],
+  A: ["A.0.0"],
   B: ["B"],
   C: ["C"],
-  D: ["D"],
+  D: ["D.0.0"],
   E: ["E"],
   R: ["X", "X", "X", "o"],
   // row: ["#block#::#block#::#block#"],
-  row: ["#block#,#block#"],
+  row: ["#block#::#block#::#block#::#block#"],
   grid: ["#row#"],
   // grid: ["#row#::#row#"],
   origin: ["#grid#"],
@@ -31,25 +32,113 @@ const block_regions = {
     [0, 0],
     [1, 0],
     [2, 0],
-    [3, 0],
+
+    [0, 1],
+    [1, 1],
+    [2, 1],
+    
+    [0, 2],
+    [1, 2],
+    [2, 2],
+    
+    [0, 3],
+    [1, 3],
+    [2, 3],
   ],
   B: [
     [0, 0],
+    [0, 1],
+
+
     [1, 0],
     [1, 1],
-  ],
-  C: [
-    [0, 0],
-    [1, 0],
+
+
     [2, 0],
+    [2, 1],
+
+
     [3, 0],
+    [3, 1],
+
+
+    [4, 0],
+    [4, 1],
+
+    [5, 0],
+    [5, 1],
+
+    [6, 0],
+    [6, 1],
+
+
+    [7, 0],
+    [7, 1],
+
+
+    [3, 2],
+    [4, 2],
+
+    [3, 3],
+    [4, 3],
+
+],
+  C: [
+    [3, 0],
+    [4, 0],
+    [3, 1],
+    [4, 1],
+
+    [0, 2],
+    [0, 3],
+
+
+    [1, 2],
+    [1, 3],
+
+
+    [1, 2],
+    [1, 3],
+
+
+    [2, 2],
+    [2, 3],
+
+
+    [3, 2],
+    [3, 3],
+
+
+    [4, 2],
+    [4, 3],
   ],
   D: [
     [0, 0],
-    [1, 0],
-    [2, 0],
-    [3, 0],
-    [4, 0],
+    [0, 1],
+    [0, 2],
+    [0, 3],
+    [0, 4],
+    [0, 5],
+    [0, 6],
+    [0, 7],
+    [0, 8],
+    [0, 9],
+    [0, 10],
+    [0, 11],
+
+
+    // [1, 0],
+    // [1, 1],
+    // [1, 2],
+    // [1, 3],
+    // [1, 4],
+    // [1, 5],
+    // [1, 6],
+    // [1, 7],
+    // [1, 8],
+    // [1, 9],
+    // [1, 10],
+    // [1, 11]
   ],
 
   E: [
@@ -61,6 +150,14 @@ const block_regions = {
   ]
 };
 
+
+const mirrorMaze = (maze_array) => {
+    for (let row = 0; row < maze_array.length; row++) {
+        for (let col = 0; col < (maze_array[row].length/2); col++) {
+            maze_array[row][maze_array[row].length - 1 - col] = maze_array[row][col];
+        }
+    }
+}
 const drawMazeBorder = (maze_array) => {
   for (let row = 0; row < maze_array.length; row++) {
     for (let col = 0; col < maze_array[row].length; col++) {
@@ -78,6 +175,22 @@ const drawMazeBorder = (maze_array) => {
   return maze_array;
 };
 
+const findFirstFreeSpace = (maze_array, col) => {
+    let last = false;
+    for (let row = 0; row < maze_array.length; row++) {
+        if (maze_array[row][col] == "o") {
+            if (last) {
+                return row;
+            }
+            last = true;
+        }
+        else {
+            last = false;
+        }
+    }
+    throw new Error("No free space found");
+}
+
 const PCG = () => {
   const grammar = tracery.createGrammar(grammar_config);
   const result = grammar.flatten("#origin#");
@@ -85,7 +198,7 @@ const PCG = () => {
   console.log(result);
 
   // split result by :: delimiter
-  const bricks = result.split(",").map((x) => x.split("::"));
+  const bricks = [result.split("::")];
 
   console.log(bricks);
 
@@ -100,26 +213,30 @@ const PCG = () => {
   let current_col = 2;
   for (let i = 0; i < bricks.length; i++) {
     for (let k = 0; k < bricks[i].length; k++) {
-      const brick_collection = bricks[i][k].split("");
+      const brick_collection = bricks[i][k].split(",").map(e=>e.split("."));
+      let last_x = 0;
       for (let j = 0; j < brick_collection.length; j++) {
-        const brick = brick_collection[j];
+        let [brick, offsetX, offsetY] = brick_collection[j];
+        offsetX = parseInt(offsetX);
+        offsetY = parseInt(offsetY);
+        console.log(brick, offsetX, offsetY);
         const brick_region = block_regions[brick];
         console.log("brick_region", brick_region);
 
-        let last_x = 0;
         for (let k = 0; k < brick_region.length; k++) {
           const [x, y] = brick_region[k];
-          maze_array[current_row + x][current_col + y] = "X";
+          maze_array[current_row + x + offsetX][current_col + y + offsetY] = "X";
           // maze_array[current_row+x][current_col+y] = brick;
 
           last_x = Math.max(last_x, x);
         }
-        current_row += last_x + 2;
-      }
+    }
+    current_row += last_x + 2;
     }
     current_row = 2;
     current_col += 2;
   }
+  mirrorMaze(maze_array);
   console.log(maze_array);
   maze_array = drawMazeBorder(maze_array);
   return maze_array.map((row) => [row.join("")]);
