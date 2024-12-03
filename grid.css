@@ -9,10 +9,10 @@
     display: inline-block;
     width: 34px;
     height: 34px;
-    background-color: white;
+    /* background-color: white; */
     float: left;
     vertical-align: top;
-    border: solid 10px white;
+    /* border: solid 10px white; */
     /* border: 2px solid black;   */
 }
 
