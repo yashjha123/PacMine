@@ -257,6 +257,7 @@ const drawMazeBorder = (maze_array, exit_row) => {
   for (let row = 0; row < maze_array.length; row++) {
     for (let col = 0; col < maze_array[row].length; col++) {
       if(row==exit_row){
+        maze_array[row][0] = " ";
         continue;
       }
       if (row == 0) {
@@ -390,6 +391,8 @@ let spawnFill = [
   ["X", "X", "X", " ", " ", " ", "X", "X", "X"],
   ["X", "X", "X", " ", " ", " ", "X", "X", "X"],
   [" ", "X", " ", " ", "X", " ",  " ", "X", " "],
+  ["N", "N", "N", " ", "X", " ",  "N", "N", "N"],
+  ["N", "X", "N", "N", "N", "N",  "N", "X", "N"],
 ]
 
 const drawSpawn = (mazeArray) => {
@@ -398,10 +401,13 @@ const drawSpawn = (mazeArray) => {
   let midY = Math.floor( mazeArray[0].length / 2);
   let spawnStartY = midY - 5;
   let spawnEndX = midX + 9;
-  let spawnEndY = midY + 3;
+  let spawnEndY = midY + 9;
   for (let row = spawnStartX; row < spawnEndX; row++) {
     for (let col = spawnStartY; col < spawnEndY; col++) {
       let val = spawnFill[row - spawnStartX][col - spawnStartY];
+      if (val == "N") {
+         continue;
+      }
       console.log(row - spawnStartX, col - spawnStartY, val);
       mazeArray[row][col] = val;
     }
@@ -439,7 +445,7 @@ const plotFigures = (bricks, maze_array, exit_row, current_row, current_col) => 
           console.log(brick_region[k]);
           const [x, y] = brick_region[k];
           console.log(current_row + x + offsetX);
-          if (current_row + x + offsetX < 0 || current_row + x + offsetX >= (MAZE_ROWS-3) || current_col + y + offsetY < 0 || current_col + y + offsetY >= MAZE_COLS) {
+          if (current_row + x + offsetX < 0 || current_row + x + offsetX >= (MAZE_ROWS-4) || current_col + y + offsetY < 0 || current_col + y + offsetY >= MAZE_COLS) {
             console.log("out of bounds");
             continue;
           }
@@ -480,7 +486,7 @@ const findClosestPoint = (mazeArray, x, y) => {
 
 const placePower = (mazeArray, coords) => {
   const [x, y] = coords;
-  mazeArray[x][y] = "O";
+  mazeArray[y][x] = "O";
 }
 
 const PCG = () => {
