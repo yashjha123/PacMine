@@ -191,6 +191,60 @@ const findFirstFreeSpace = (maze_array, col) => {
     throw new Error("No free space found");
 }
 
+const findUncoveredSpaces = (mazeArray) => {
+    
+  let ret_maze_array = new Array(30).fill(0);
+  for (let row_i = 0; row_i < 30; row_i++) {
+    let row = new Array(28).fill(0);
+    ret_maze_array[row_i] = row;
+  }
+
+  
+  // we ignore the columns with the walls
+  for (let row_i = 0; row_i < 30; row_i++) {
+    
+    for (let col_i = 0; col_i < 28; col_i++) {
+      if(row_i==0){
+        ret_maze_array[row_i][0] = 1;
+        continue;
+      }
+      if(row_i==29){
+        ret_maze_array[row_i][27] = 1;
+        continue;
+      }
+      if(col_i==0){
+        ret_maze_array[row_i][col_i] = 1;
+        continue;
+      }
+      if(col_i==27){
+        ret_maze_array[row_i][col_i] = 1;
+        continue;
+      }
+      if (mazeArray[row_i][col_i] == "X") {
+        ret_maze_array[row_i+1][col_i] = 1;
+        ret_maze_array[row_i+1][col_i+1] = 1;
+        ret_maze_array[row_i+1][col_i-1] = 1;
+        ret_maze_array[row_i-1][col_i] = 1;
+        ret_maze_array[row_i-1][col_i-1] = 1;
+        ret_maze_array[row_i-1][col_i+1] = 1;
+        ret_maze_array[row_i][col_i+1] = 1;
+        ret_maze_array[row_i][col_i-1] = 1;
+      }
+    }
+  }
+  return ret_maze_array;
+}
+
+const mergeMazeArrays = (mazeArray, mazeArray2) => {
+    for (let row_i = 0; row_i < 30; row_i++) {
+        for (let col_i = 0; col_i < 28; col_i++) {
+            if(mazeArray2[row_i][col_i]==0){
+                mazeArray[row_i][col_i] = "X";
+            }
+        }
+    }
+}
+
 const PCG = () => {
   const grammar = tracery.createGrammar(grammar_config);
   const result = grammar.flatten("#origin#");
@@ -239,6 +293,8 @@ const PCG = () => {
   mirrorMaze(maze_array);
   console.log(maze_array);
   maze_array = drawMazeBorder(maze_array);
+  const maze_array2 = findUncoveredSpaces(maze_array);
+  mergeMazeArrays(maze_array, maze_array2);
   return maze_array.map((row) => [row.join("")]);
 };
 
